@@ -1,4 +1,4 @@
-#!/home/GLBRCORG/mplace/anaconda3/bin/python
+#!/home/mplace/anaconda3/bin/python
 """
 program: BarSeq.py
 
@@ -29,8 +29,6 @@ output  : 2 Text files w/ Table, with counts per gene for each experiment, 1 for
 
             GeneName    Experiment1    Experiment2
             YAL001C      read_count     read_count
-            
-            
             
 author  : mplace
 date    : Feb 5th 2016
@@ -70,8 +68,7 @@ class BarSeq( object ):
         for key, value in self.seqIdTag.items():
             if read.startswith(value[0]):
                 return key
-
-        return None
+        return
                     
     def matchGene( self, read ):
         """
@@ -80,25 +77,27 @@ class BarSeq( object ):
         """
         for key, value in self.geneUpTag.items():
             geneSeq = read[28:]
-            if geneSeq.startswith(value[0]):
+            if geneSeq.startswith(value[0]):             
                 return key
-        
-        return  None
+        return
     
     def matchGeneFuzzy( self, read ):
         """
         Match GENE UPTAG allowing 1 mismatch using hamming distance (only considers substitution).
+        Discard reads with 3 or more N's.
         sum(c1!=c2 for c1,c2 in zip(value[0], geneSeq ))
         """
         hammingDist = 0
         for key, value in self.geneUpTag.items():
             end = 28 + len(value[0])
             geneSeq = read[28:end]
-            hammingDist = sum(c1!=c2 for c1,c2 in zip(value[0], geneSeq ))
-            if hammingDist == 1:           
-                return True
-                
-        return False
+            if geneSeq.count('N') < 2:           # discard reads with too many N's
+                hammingDist = sum(c1!=c2 for c1,c2 in zip(value[0], geneSeq ))
+                if hammingDist == 1:           
+                    return key
+            else:
+                return None
+        return None
             
     def processFastq( self ):
         """
@@ -121,9 +120,10 @@ class BarSeq( object ):
                     else:
                         self.exact_Results[SeqID][geneName] = 1              
             # CHECK FOR 1 mismatch if exact matching fails
-                if geneName is None:
+                else:
                     fuzzy = self.matchGeneFuzzy(read)
                     if fuzzy:
+                        geneName = fuzzy
                         if SeqID in self.fuzzy_Results:
                             if geneName in self.fuzzy_Results[SeqID]:
                                 self.fuzzy_Results[SeqID][geneName] += 1
@@ -135,21 +135,59 @@ class BarSeq( object ):
     
     def mergeCounts( self ):
         """
-        Add the exact match gene counts to the fuzzy counts 
-        producing a total of all counts.
+        Sum exact match gene counts and fuzzy counts producing total counts.
+        If fuzzy has no count, just use the exact count.
         """
-        pass
+        for seqid in self.exact_Results.keys():
+            for gene, count in self.exact_Results[seqid].items():
+                if seqid in self.fuzzy_Results:
+                    if gene in self.fuzzy_Results[seqid] and gene in self.exact_Results[seqid]:
+                        self.fuzzy_Results[seqid][gene] =  int(count) + int(self.fuzzy_Results[seqid][gene])
+                    else:
+                        if gene in self.exact_Results[seqid] and gene not in self.fuzzy_Results[seqid]:
+                            self.fuzzy_Results[seqid][gene] = int(count)
+                            #print("2  seqid: %s  gene: %s count: %s fuzzyCount: NONE   MergedCount: %d " %(seqid, gene, count, int(count)  ))
+                        #elif gene in self.fuzzy_Results[seqid] and gene not in self.exact_Results[seqid]:
+                        #    self.fuzzy_Results[seqid][gene]
+                        #    print("3  seqid: %s  gene: %s count: 0 fuzzyCount: %d   MergedCount: %d " %(seqid, gene, self.fuzzy_Results[seqid][gene],  self.fuzzy_Results[seqid][gene]  ))   
+                        #else:
+                        #    print("3  seqid: %s  gene: %s count: 0  merged: 0" %(seqid, gene) )
+            
+        """for key in self.fuzzy_Results.keys():
+            print("key: %s" %(key))
+            for k in self.fuzzy_Results[key].keys():
+                print("second key %s value %s" %(k, self.fuzzy_Results[key][k]))
+        """        
+        
+    def writeFuzzyTable( self ):
+        """
+        Write 1-mismatch gene counts to file as a table
+        """
+        # WRITE HEADER
+        print("1mismatch-gene", end='')
+        for key in self.fuzzy_Results.keys():
+            print("\t%s" %(key), end='')
+        print()
+        # WRITE TABLE
+        for idx in range(0, len(self.geneList)):
+            print(self.geneList[idx], end='\t')
+            for key  in self.fuzzy_Results.keys():
+                if self.geneList[idx] not in self.fuzzy_Results[key]:
+                    print( 0, end='\t')
+                else:
+                    print( self.fuzzy_Results[key][self.geneList[idx]], end='\t')
+            print()
     
     def writeTable( self ):
         """
-        Write experiment and gene counts to file as a table
+        Write exact match gene counts to file as a table
         """
         # WRITE HEADER
         print("gene", end='')
         for key in self.exact_Results.keys():
             print("\t%s" %(key), end='')
         print()
-        
+        # WRITE TABLE
         for idx in range(0, len(self.geneList)):
             print(self.geneList[idx], end='\t')
             for key  in self.exact_Results.keys():
@@ -158,7 +196,6 @@ class BarSeq( object ):
                 else:
                     print( self.exact_Results[key][self.geneList[idx]], end='\t')
             print()
-            #print(self.geneList[idx])
             
 
     def getSeqIdTag( self ):
@@ -195,8 +232,7 @@ class BarSeq( object ):
                 line = line.rstrip()
                 if line.startswith('Y'):
                     items = line.split()
-                    if len(items[1]) >= 15:
-                        geneUpTag[items[0]].append(items[1])
+                    geneUpTag[items[0]].append(items[1])
                     if items[0] not in self.geneList:
                         self.geneList.append(items[0])
         
@@ -268,11 +304,13 @@ def main():
     
     # Start processing the data
     data = BarSeq(fastq, geneDecode, seqID, cwd)
+    
     #print(data.geneUpTag)
     #print(data.seqIdTag)
     data.processFastq()
     data.writeTable()
-    
+    #data.mergeCounts()
+    #data.writeFuzzyTable()
 
 
 if __name__ == "__main__":
