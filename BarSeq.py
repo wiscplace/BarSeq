@@ -2,7 +2,7 @@
 """
 program: BarSeq.py
 
-purpose: Produce a table of gene counts from DNA Bar-Seq data.
+purpose: Produce 2 tables (exact and 1 mismatch) of gene counts from DNA Bar-Seq data.
          The Bar-Seq fastq file is expected to be for a single user, 
          if you need to split reads, use: SplitBarSeqByUser.py.
 
@@ -45,8 +45,8 @@ class BarSeq( object ):
         """
         parameters:
         fastq  = BarSeq fastq file, expected to be for a single user
-        cwd    = current working directory
         decode = Gene UP_tag file 
+        cwd    = current working directory
         seqID  = Experiment ID_tag file
         """
         self.fastq     = fastq  
@@ -74,6 +74,9 @@ class BarSeq( object ):
         """
         Match GENE UPTAG to sequence read,
         Tag must be an exact match
+        Assumes the Gene part of the sequence begins at the 29th base of the read.
+        If not you will need to change the base number in geneSeq = read[28:]
+        to an appropriate value.
         """
         for key, value in self.geneUpTag.items():
             geneSeq = read[28:]
@@ -84,7 +87,7 @@ class BarSeq( object ):
     def matchGeneFuzzy( self, read ):
         """
         Match GENE UPTAG allowing 1 mismatch using hamming distance (only considers substitution).
-        Discard reads with 3 or more N's.
+        Discard reads with 2 or more N's.
         sum(c1!=c2 for c1,c2 in zip(value[0], geneSeq ))
         """
         hammingDist = 0
@@ -95,8 +98,7 @@ class BarSeq( object ):
                 hammingDist = sum(c1!=c2 for c1,c2 in zip(value[0], geneSeq ))
                 if hammingDist == 1:           
                     return key
-            else:
-                return None
+            
         return None
             
     def processFastq( self ):
@@ -146,57 +148,34 @@ class BarSeq( object ):
                     else:
                         if gene in self.exact_Results[seqid] and gene not in self.fuzzy_Results[seqid]:
                             self.fuzzy_Results[seqid][gene] = int(count)
-                            #print("2  seqid: %s  gene: %s count: %s fuzzyCount: NONE   MergedCount: %d " %(seqid, gene, count, int(count)  ))
-                        #elif gene in self.fuzzy_Results[seqid] and gene not in self.exact_Results[seqid]:
-                        #    self.fuzzy_Results[seqid][gene]
-                        #    print("3  seqid: %s  gene: %s count: 0 fuzzyCount: %d   MergedCount: %d " %(seqid, gene, self.fuzzy_Results[seqid][gene],  self.fuzzy_Results[seqid][gene]  ))   
-                        #else:
-                        #    print("3  seqid: %s  gene: %s count: 0  merged: 0" %(seqid, gene) )
-            
         """for key in self.fuzzy_Results.keys():
             print("key: %s" %(key))
             for k in self.fuzzy_Results[key].keys():
                 print("second key %s value %s" %(k, self.fuzzy_Results[key][k]))
         """        
-        
-    def writeFuzzyTable( self ):
+
+    def writeTable( self, data, outName ):
         """
-        Write 1-mismatch gene counts to file as a table
-        """
-        # WRITE HEADER
-        print("1mismatch-gene", end='')
-        for key in self.fuzzy_Results.keys():
-            print("\t%s" %(key), end='')
-        print()
-        # WRITE TABLE
-        for idx in range(0, len(self.geneList)):
-            print(self.geneList[idx], end='\t')
-            for key  in self.fuzzy_Results.keys():
-                if self.geneList[idx] not in self.fuzzy_Results[key]:
-                    print( 0, end='\t')
-                else:
-                    print( self.fuzzy_Results[key][self.geneList[idx]], end='\t')
-            print()
-    
-    def writeTable( self ):
-        """
-        Write exact match gene counts to file as a table
-        """
-        # WRITE HEADER
-        print("gene", end='')
-        for key in self.exact_Results.keys():
-            print("\t%s" %(key), end='')
-        print()
-        # WRITE TABLE
-        for idx in range(0, len(self.geneList)):
-            print(self.geneList[idx], end='\t')
-            for key  in self.exact_Results.keys():
-                if self.geneList[idx] not in self.exact_Results[key]:
-                    print( 0, end='\t')
-                else:
-                    print( self.exact_Results[key][self.geneList[idx]], end='\t')
-            print()
+        Write gene counts to file as a tab delimited table.
+        """ 
+        sampleList = list(data.keys())                  # get list to maintain order when writing table      
+        sampleList.sort()
+
+        with open( outName, 'w') as out:
+            out.write('gene')
+            for name in sampleList:
+                newName = name + "-" + self.seqIdTag[name][0]
+                out.write("\t%s" %(newName))
+            out.write("\n")
             
+            for idx in range(0, len(self.geneList)):
+                out.write("%s\t" %( self.geneList[idx]))
+                for sample in sampleList:
+                    if self.geneList[idx] not in self.exact_Results[sample]:
+                        out.write('0\t')
+                    else:
+                        out.write('%s\t' %(self.exact_Results[sample][self.geneList[idx]]))
+                out.write("\n")
 
     def getSeqIdTag( self ):
         """
@@ -306,12 +285,11 @@ def main():
     data = BarSeq(fastq, geneDecode, seqID, cwd)
     
     #print(data.geneUpTag)
-    #print(data.seqIdTag)
+    #print(data.seqIdTag)    
     data.processFastq()
-    data.writeTable()
-    #data.mergeCounts()
-    #data.writeFuzzyTable()
-
+    data.writeTable(data.exact_Results,"Exact-Match.table")
+    data.mergeCounts()
+    data.writeTable(data.fuzzy_Results, "1-MisMatch.table")
 
 if __name__ == "__main__":
     main()           
