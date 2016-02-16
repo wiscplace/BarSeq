@@ -1,4 +1,4 @@
-BarSeq.py -f fastq file -d GENE UP_tag Decode file -s Seq_ID UP_tag Decode file
+BarSeq-fast.py -f fastq file -d GENE UP_tag Decode file -s Seq_ID UP_tag Decode file
 
   Purpose: Produce a table of gene counts from DNA Bar-Seq data
 
@@ -15,7 +15,7 @@ BarSeq.py -f fastq file -d GENE UP_tag Decode file -s Seq_ID UP_tag Decode file
         1248 T0 B       B1      AGCGTATGTC    kevin
 
 
-  Usage  : BarSeq.py -f data.fastq -d GENE_UP_tag_Decode.txt -s SeqID.txt
+  Usage  : BarSeq-fast.py -f data.fastq -d GENE_UP_tag_Decode.txt -s SeqID.txt
   
 	To see Python Docs for this program:
 
@@ -28,7 +28,7 @@ BarSeq.py -f fastq file -d GENE UP_tag Decode file -s Seq_ID UP_tag Decode file
 	See Mike Place for any problems or suggestions.
 
 
-SplitBarSeqByUser.py -f fastq file -s Seq_ID Up_Tag file
+SplitBarSeqByUser-fast.py -f fastq file -s Seq_ID Up_Tag file
 
   Purpose: Create a new fastq file for each users data.
 
@@ -40,7 +40,7 @@ SplitBarSeqByUser.py -f fastq file -s Seq_ID Up_Tag file
         1248 T0 B       B1      AGCGTATGTC    maria
 
 
-  Usage  : BarSeq.py -f data.fastq -s SeqID.txt
+  Usage  : SplitBarSeqByUser.py -f data.fastq -s SeqID.txt
   
 	To see Python Docs for this program:
 
@@ -51,3 +51,8 @@ SplitBarSeqByUser.py -f fastq file -s Seq_ID Up_Tag file
 	help(SplitBarSeqByUser)
 
 	See Mike Place for any problems or suggestions.
+
+###############################################################################
+BarSeq.py and SplitBarSeqByUser.py -- original implementation, very slow, do not use.
+###############################################################################
+
