@@ -1,4 +1,4 @@
-#!/home/mplace/anaconda3/bin/python
+#!/home/GLBRCORG/mplace/anaconda3/bin/python
 """
 program: SplitBarSeqByUser-fast.py
 
@@ -35,10 +35,11 @@ def matchSeqId( read, seqID ):
     Match a sequence read to an experiment with a seqID tag
     seqID tag must match start of string and be an EXACT match.
     """
-    for key, value in seqID.items():
-        if read.startswith(value[0]):
-            return value[1]
-    return 
+    seqTag = read[:10]
+    if seqTag in seqID:
+        return seqID[seqTag][1]
+        
+    return None
                         
 def processFastq( fastq, seqID ):
     """
@@ -74,13 +75,14 @@ def getSeqIdTag( seqIDFile ):
                 continue
             line = line.rstrip()
             items = line.split()
-            sampleID = ["".join(items[0:3])]    
-            if sampleID[0] in seqUpTag:
-                print("Duplicate sampleID %s" %(sampleID[0]))
+            sampleID = ["".join(items[0:3])]
+            
+            if items[4] in seqUpTag:
+                print("Duplicate seqUpTag %s" %(items[4]))
             else:
-                seqUpTag[sampleID[0]].append(items[4])
-                seqUpTag[sampleID[0]].append(items[5])
-                
+                seqUpTag[items[4]].append(sampleID[0])
+                seqUpTag[items[4]].append(items[5])
+               
     return seqUpTag
                     
 def main():
@@ -134,7 +136,7 @@ def main():
             sys.exit(1)            
     
     # Start processing the data
-    seqID = getSeqIdTag(seqIDFile)   # looks like 1248T1B ['TATCGGAAGC', 'maria']
+    seqID = getSeqIdTag(seqIDFile)   # looks like 1248T1B ['TATCGGAAGC', 'maria']    
     processFastq( fastq, seqID )     # open fastq and separate reads by user
 
 
