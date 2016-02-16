@@ -33,12 +33,11 @@ output  : 2 Text files w/ Table, with counts per gene for each experiment, 1 for
 author  : mplace
 date    : Feb 5th 2016
 """
-from Bio import SeqIO
 from collections import defaultdict
 import argparse
 import itertools
 import os
-import profile
+
 import sys
 
 class BarSeq( object ):
@@ -81,9 +80,10 @@ class BarSeq( object ):
         to an appropriate value.
         """
         for key, value in self.geneUpTag.items():
-            geneSeq = read[28:]
-            if geneSeq.startswith(value[0]):             
-                return key
+            end = 28 + len(key)            
+            geneSeq = read[28:end]
+            if geneSeq in self.geneUpTag: 
+                return self.geneUpTag[geneSeq]
         return
     
     def matchGeneFuzzy( self, read ):
@@ -94,12 +94,12 @@ class BarSeq( object ):
         """
         hammingDist = 0
         for key, value in self.geneUpTag.items():
-            end = 28 + len(value[0])
+            end = 28 + len(key)
             geneSeq = read[28:end]
             if geneSeq.count('N') < 2:           # discard reads with too many N's
                 hammingDist = sum(c1!=c2 for c1,c2 in zip(value[0], geneSeq ))
                 if hammingDist == 1:           
-                    return key
+                    return value
             
         return None
             
@@ -152,12 +152,7 @@ class BarSeq( object ):
                         self.fuzzy_Results[seqid][gene] =  int(count) + int(self.fuzzy_Results[seqid][gene])
                     else:
                         if gene in self.exact_Results[seqid] and gene not in self.fuzzy_Results[seqid]:
-                            self.fuzzy_Results[seqid][gene] = int(count)
-        """for key in self.fuzzy_Results.keys():
-            print("key: %s" %(key))
-            for k in self.fuzzy_Results[key].keys():
-                print("second key %s value %s" %(k, self.fuzzy_Results[key][k]))
-        """        
+                            self.fuzzy_Results[seqid][gene] = int(count)      
 
     def writeTable( self, data, outName ):
         """
@@ -207,16 +202,19 @@ class BarSeq( object ):
     def getGeneUpTag( self ):
         """
         Get GENE UP_tag Decode information, put in dictionary, 
-        key = GENE,  value = list of sequence tags
+        key = sequence uptag  value = gene
         """
-        geneUpTag = defaultdict(list)
-        
+        #geneUpTag = defaultdict(list)
+        geneUpTag = dict()
+
         with open( self.decode, 'r') as f:
             for line in f:
                 line = line.rstrip()
                 if line.startswith('Y'):
                     items = line.split()
-                    geneUpTag[items[0]].append(items[1])
+                    #geneUpTag[items[0]].append(items[1])
+                    geneUpTag[items[1]] = items[0]
+                    # Store a list of GENE Names
                     if items[0] not in self.geneList:
                         self.geneList.append(items[0])
         
@@ -290,6 +288,8 @@ def main():
     data = BarSeq(fastq, geneDecode, seqID, cwd)
     
     #print(data.geneUpTag)
+    #print(len(data.geneUpTag))
+    #print(data.geneList)
     #print(data.seqIdTag)    
     data.processFastq()
     data.writeTable(data.exact_Results,"Exact-Match.table")
