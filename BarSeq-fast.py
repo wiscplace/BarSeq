@@ -1,6 +1,6 @@
-#!/home/GLBRCORG/mplace/anaconda3/bin/python
+#!/home/mplace/anaconda3/bin/python
 """
-program: BarSeq.py
+program: BarSeq-fast.py
 
 purpose: Produce 2 tables (exact and 1 mismatch) of gene counts from DNA Bar-Seq data.
          The Bar-Seq fastq file is expected to be for a single user, 
@@ -101,7 +101,7 @@ class BarSeq( object ):
                 if hammingDist == 1:           
                     return value
             
-        return None
+        return 
             
     def processFastq( self ):
         """
@@ -222,7 +222,7 @@ class BarSeq( object ):
                     
 def main():
     cmdparser = argparse.ArgumentParser(description="Produce a table of gene counts from DNA Bar-Seq data.",
-                                        usage='%(prog)s -f fastq -d UP_tag_Decode file -s Seq_ID file', prog='BarSeq.py'  )                                  
+                                        usage='%(prog)s -f fastq -d UP_tag_Decode file -s Seq_ID file', prog='BarSeq-fast.py'  )                                  
     cmdparser.add_argument('-f', '--Fastq' , action='store'     , dest='FASTQ' , help='BarSeq fastq file'         , metavar='')
     cmdparser.add_argument('-d', '--Decode', action='store'     , dest='DECODE', help='GENE UP_tag_Decode file'        , metavar='')    
     cmdparser.add_argument('-s', '--Seqid' , action='store'     , dest='SEQID' , help='Seq_ID file (experiment ID)', metavar='')
@@ -236,7 +236,7 @@ def main():
         sys.exit(1)
     
     if cmdResults['INFO']:
-        print("\n  BarSeq.py -f fastq file -d GENE UP_tag Decode file -s Seq_ID UP_tag Decode file")
+        print("\n  BarSeq-fast.py -f fastq file -d GENE UP_tag Decode file -s Seq_ID UP_tag Decode file")
         print("\n  Purpose: Produce a table of gene counts from DNA Bar-Seq data")
         print("\n  Input  : BarSeq fastq file, GENE UP_tag Decode file, Seq_ID UP_tag Decode file")
         print("\n    GENE UP_tag Decode file:")
@@ -249,14 +249,14 @@ def main():
         print("        1248 T0 A       A1      AATAGGCGCT    kevin ")
         print("        1248 T0 B       B1      AGCGTATGTC    kevin")
         print()
-        print("\n  Usage  : BarSeq.py -f data.fastq -d GENE_UP_tag_Decode.txt -s SeqID.txt")        
+        print("\n  Usage  : BarSeq-fast.py -f data.fastq -d GENE_UP_tag_Decode.txt -s SeqID.txt")        
         print("  ")       
         print("\tTo see Python Docs for this program:")
         print("\n\tOpen python console and enter")
         print("\timport sys")
         print("\tsys.path.append('/full/path/to/script')")
-        print("\timport BarSeq")
-        print("\thelp(BarSeq)")
+        print("\timport BarSeq-fast")
+        print("\thelp(BarSeq-fast)")
         print("\n\tSee Mike Place for any problems or suggestions.")
         sys.exit(1)
     
@@ -286,11 +286,6 @@ def main():
     
     # Start processing the data
     data = BarSeq(fastq, geneDecode, seqID, cwd)
-    
-    #print(data.geneUpTag)
-    #print(len(data.geneUpTag))
-    #print(data.geneList)
-    #print(data.seqIdTag)    
     data.processFastq()
     data.writeTable(data.exact_Results,"Exact-Match.table")
     data.mergeCounts()
