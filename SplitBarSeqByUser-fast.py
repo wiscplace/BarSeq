@@ -1,6 +1,6 @@
-#!/home/GLBRCORG/mplace/anaconda3/bin/python
+#!/home/mplace/anaconda3/bin/python
 """
-program: SplitBarSeqByUser.py
+program: SplitBarSeqByUser-fast.py
 
 purpose: Split Fastq (DNA Bar-Seq data) by user.
 
@@ -38,7 +38,7 @@ def matchSeqId( read, seqID ):
     for key, value in seqID.items():
         if read.startswith(value[0]):
             return value[1]
-    return None
+    return 
                         
 def processFastq( fastq, seqID ):
     """
@@ -54,15 +54,12 @@ def processFastq( fastq, seqID ):
         os.mknod(newFastq)        
         
     with open( fastq, "rU" ) as data:
-        for line1, line2, line3, line4 in itertools.zip_longest(*[data]*4):
-            header = line1.rstrip()
+        for header, line2, sign, qual in itertools.zip_longest(*[data]*4):
             read    = line2.rstrip()
-            sign   = line3.rstrip()
-            qual   = line4.rstrip()
             user = matchSeqId(read, seqID)  #exact matching
             if user:
                 with open(user + '.fastq','a') as out:
-                    out.writelines([header,"\n", read, "\n", sign, "\n", qual, "\n"])            
+                    out.writelines([header, read, "\n", sign, qual])            
                             
 def getSeqIdTag( seqIDFile ):
     """
@@ -88,7 +85,7 @@ def getSeqIdTag( seqIDFile ):
                     
 def main():
     cmdparser = argparse.ArgumentParser(description="Split Fastq (DNA Bar-Seq data) by user.",
-                                        usage='%(prog)s -f fastq -s Seq_ID Up_Tag file', prog='SplitBarSeqByUser.py'  )                                  
+                                        usage='%(prog)s -f fastq -s Seq_ID Up_Tag file', prog='SplitBarSeqByUser-fast.py'  )                                  
     cmdparser.add_argument('-f', '--Fastq' , action='store'     , dest='FASTQ' , help='BarSeq fastq file'         , metavar='')  
     cmdparser.add_argument('-s', '--Seqid' , action='store'     , dest='SEQID' , help='Seq_ID file (experiment ID)', metavar='')
     cmdparser.add_argument('-i', '--info'  , action='store_true', dest='INFO'  , help='Print a more detailed description of program.')
@@ -101,7 +98,7 @@ def main():
         sys.exit(1)
     
     if cmdResults['INFO']:
-        print("\n  SplitBarSeqByUser.py -f fastq file -s Seq_ID Up_Tag file")
+        print("\n  SplitBarSeqByUser-fast.py -f fastq file -s Seq_ID Up_Tag file")
         print("\n  Purpose: Create a new fastq file for each users data.")
         print("\n  Input  : BarSeq fastq file, Seq_ID file")
         print()
@@ -110,14 +107,14 @@ def main():
         print("        1248 T0 A       A1      AATAGGCGCT    kevin ")
         print("        1248 T0 B       B1      AGCGTATGTC    maria")
         print()
-        print("\n  Usage  : BarSeq.py -f data.fastq -s SeqID.txt")        
+        print("\n  Usage  : SplitBarSeqByUser-fast.py -f data.fastq -s SeqID.txt")        
         print("  ")       
         print("\tTo see Python Docs for this program:")
         print("\n\tOpen python console and enter")
         print("\timport sys")
         print("\tsys.path.append('/full/path/to/script')")
-        print("\timport SplitBarSeqByUser")
-        print("\thelp(SplitBarSeqByUser)")
+        print("\timport SplitBarSeqByUser-fast")
+        print("\thelp(SplitBarSeqByUser-fast)")
         print("\n\tSee Mike Place for any problems or suggestions.")
         sys.exit(1)
     
@@ -135,8 +132,6 @@ def main():
             print("\n\t*** The %s seqID Decode file could not be found! ***\n\n" %(seqIDFile) )
             cmdparser.print_help()
             sys.exit(1)            
-        
-    cwd = os.getcwd()                                     # current working dir
     
     # Start processing the data
     seqID = getSeqIdTag(seqIDFile)   # looks like 1248T1B ['TATCGGAAGC', 'maria']
