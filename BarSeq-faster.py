@@ -49,6 +49,7 @@ from collections import defaultdict
 import argparse
 import itertools
 import os
+
 import sys
 
 class BarSeq( object ):
@@ -66,11 +67,11 @@ class BarSeq( object ):
         self.seqid     = seqID
         self.decode    = decode
         self.geneList  = []                    # Gene names 
-
+        self.exact_Results = dict()            #  dict(key=experiment) value = Dict(key = Gene, value = Counts )
+        self.fuzzy_Results = dict()            # for results with 1 mismatch
         self.geneUpTag = self.getGeneUpTag()   # key = sequence tag values = gene name
         self.seqIdTag  = self.getSeqIdTag()    # key = sampleID, values = list [ sequnce, user ]
-        self.exact_Results = defaultdict(dict) #  dict(key=experiment) value = Dict(key = Gene, value = Counts )
-        self.fuzzy_Results = defaultdict(dict) # for results with 1 mismatch  
+  
         
     def matchSeqId( self, read ):
         """
@@ -91,13 +92,12 @@ class BarSeq( object ):
         variable length, we loop through the known ranges, 10-22 to speed up 
         the search.
         """
-        
         for idx in range(10,23):
             end = 28 + idx
             geneSeq = read[28:end]
             if geneSeq in self.geneUpTag: 
                 return self.geneUpTag[geneSeq]
-        return None
+        return 
     
     def matchGeneFuzzy( self, read ):
         """
@@ -109,59 +109,59 @@ class BarSeq( object ):
         for key, value in self.geneUpTag.items():
             end = 28 + len(key)
             geneSeq = read[28:end]
-            if geneSeq.count('N') < 2:           # discard reads with too many N's
-                hammingDist = sum(c1!=c2 for c1,c2 in zip(value[0], geneSeq ))
-                if hammingDist == 1:           
-                    return value
+            if geneSeq.count('N') > 2:
+                break
+            hammingDist = sum(c1!=c2 for c1,c2 in zip(key, geneSeq ))
+            if hammingDist < 2:
+                return value
             
         return 
-            
+        
     def processFastq( self ):
         """
         Open and read fastq file read by read, calling functions matchSEQID
         and matchGene functions.  If match found count and store result.
-        """
+        """        
         with open( self.fastq, "rU" ) as data:
             for line1, line2, line3, line4 in itertools.zip_longest(*[data]*4):
-                read    = line2.rstrip()           
-            # EXACT MATCHING STARTS HERE
-                SeqID =  self.matchSeqId(read)  # returns sample/experiment identifer
-                if SeqID:
-                    geneName = self.matchGene(read)
+                read    = line2.rstrip()                  # This is the sequence
+                SeqID =  self.matchSeqId(read)            # returns sample/experiment identifer
+                
+                if SeqID in self.exact_Results:           
+                    geneName = self.matchGene(read)       # Look for an Exact match  
                     if geneName:
-                        if SeqID in self.exact_Results:
-                            if geneName in self.exact_Results[SeqID]:
-                                self.exact_Results[SeqID][geneName] += 1
-                            else:
-                                self.exact_Results[SeqID][geneName] = 1
+                        if geneName in self.exact_Results[SeqID]:
+                            self.exact_Results[SeqID][geneName] += 1
                         else:
-                            self.exact_Results[SeqID][geneName] = 1              
-                # CHECK FOR 1 mismatch if exact matching fails
-                    else:
-                        fuzzy = self.matchGeneFuzzy(read)
-                        if fuzzy:
-                            geneName = fuzzy
+                            self.exact_Results[SeqID][geneName] = 1
+                    else:                                  # CHECK FOR 1 mismatch if exact matching fails
+                        fuzzyGene = self.matchGeneFuzzy(read)
+                        if fuzzyGene:
                             if SeqID in self.fuzzy_Results:
-                                if geneName in self.fuzzy_Results[SeqID]:
-                                    self.fuzzy_Results[SeqID][geneName] += 1
+                                if fuzzyGene in self.fuzzy_Results[SeqID]:
+                                    self.fuzzy_Results[SeqID][fuzzyGene] += 1
                                 else:
-                                    self.fuzzy_Results[SeqID][geneName] = 1
-                            else:
-                                self.fuzzy_Results[SeqID][geneName] = 1                   
-    
+                                    self.fuzzy_Results[SeqID][fuzzyGene] = 1                   
+                else:
+                    print('SampleID %s not found.' %(SeqID))
+             
     def mergeCounts( self ):
         """
         Sum exact match gene counts and fuzzy counts producing total counts.
         If fuzzy has no count, just use the exact count.
         """
-        for seqid in self.exact_Results.keys():
-            for gene, count in self.exact_Results[seqid].items():
-                if seqid in self.fuzzy_Results:
-                    if gene in self.fuzzy_Results[seqid] and gene in self.exact_Results[seqid]:
-                        self.fuzzy_Results[seqid][gene] =  int(count) + int(self.fuzzy_Results[seqid][gene])
-                    else:
-                        if gene in self.exact_Results[seqid] and gene not in self.fuzzy_Results[seqid]:
-                            self.fuzzy_Results[seqid][gene] = int(count)      
+        
+        for gene in self.geneList:
+            for seqid in self.fuzzy_Results.keys():
+                if gene in self.fuzzy_Results[seqid] and gene in self.exact_Results[seqid]:       # if gene in both
+                    self.fuzzy_Results[seqid][gene] += self.exact_Results[seqid][gene]
+                elif gene in self.fuzzy_Results[seqid] and gene not in self.exact_Results[seqid]: # if gene not in exact
+                    self.exact_Results[seqid][gene] = 0
+                elif gene not in self.fuzzy_Results[seqid] and gene in self.exact_Results[seqid]: # if gene not in fuzzy
+                    self.fuzzy_Results[seqid][gene] = self.exact_Results[seqid][gene]
+                else:                                                                             # if gene not in both
+                    self.fuzzy_Results[seqid][gene] = 0
+                    self.exact_Results[seqid][gene] = 0
 
     def writeTable( self, data, outName ):
         """
@@ -180,12 +180,9 @@ class BarSeq( object ):
             for idx in range(0, len(self.geneList)):
                 out.write("%s\t" %( self.geneList[idx]))
                 for sample in sampleList:
-                    if self.geneList[idx] not in self.exact_Results[sample]:
-                        out.write('0\t')
-                    else:
-                        out.write('%s\t' %(self.exact_Results[sample][self.geneList[idx]]))
+                    out.write('%s\t' %(data[sample][self.geneList[idx]]))
                 out.write("\n")
-
+        
     def getSeqIdTag( self ):
         """
         Get SeqID UP_tag Decode information, put in dictionary
@@ -200,6 +197,8 @@ class BarSeq( object ):
                 line = line.rstrip()
                 items = line.split()
                 sampleID = ["".join(items[0:3])]    
+                self.exact_Results[sampleID[0]] = dict()
+                self.fuzzy_Results[sampleID[0]] = dict()
                 if sampleID[0] in seqUpTag:
                     print("Duplicate sampleID %s" %(sampleID[0]))
                 else:
@@ -231,7 +230,7 @@ class BarSeq( object ):
                     
 def main():
     cmdparser = argparse.ArgumentParser(description="Produce a table of gene counts from DNA Bar-Seq data.",
-                                        usage='%(prog)s -f fastq -d UP_tag_Decode file -s Seq_ID file', prog='BarSeq-faster.py'  )                                  
+                                        usage='%(prog)s -f fastq -d UP_tag_Decode file -s Seq_ID file', prog='BarSeq-fast.py'  )                                  
     cmdparser.add_argument('-f', '--Fastq' , action='store'     , dest='FASTQ' , help='BarSeq fastq file'         , metavar='')
     cmdparser.add_argument('-d', '--Decode', action='store'     , dest='DECODE', help='GENE UP_tag_Decode file'        , metavar='')    
     cmdparser.add_argument('-s', '--Seqid' , action='store'     , dest='SEQID' , help='Seq_ID file (experiment ID)', metavar='')
@@ -294,11 +293,10 @@ def main():
     cwd = os.getcwd()                                     # current working dir
     
     # Start processing the data
-    data = BarSeq(fastq, geneDecode, seqID, cwd)
-    
-    data.processFastq()
-    data.writeTable(data.exact_Results,"Exact-Match.table")
+    data = BarSeq(fastq, geneDecode, seqID, cwd)  
+    data.processFastq()   
     data.mergeCounts()
+    data.writeTable(data.exact_Results,"Exact-Match.table")
     data.writeTable(data.fuzzy_Results, "1-MisMatch.table")
 
 if __name__ == "__main__":
