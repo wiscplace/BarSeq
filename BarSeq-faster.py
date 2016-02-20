@@ -111,7 +111,13 @@ class BarSeq( object ):
             geneSeq = read[28:end]
             if geneSeq.count('N') > 2:
                 break
-            hammingDist = sum(c1!=c2 for c1,c2 in zip(key, geneSeq ))
+            hammingDist = 0
+            #hammingDist = sum(c1!=c2 for c1,c2 in zip(key, geneSeq ))
+            for k,g in zip(key,geneSeq):
+                if k != g:
+                    hammingDist += 1
+                if  hammingDist >= 2:
+                    break
             if hammingDist < 2:
                 return value
             
