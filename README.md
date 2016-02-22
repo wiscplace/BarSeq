@@ -52,7 +52,3 @@ SplitBarSeqByUser-fast.py -f fastq file -s Seq_ID Up_Tag file
 
 	See Mike Place for any problems or suggestions.
 
-
-NOTE:
-BarSeq.py and SplitBarSeqByUser.py -- original implementation, very slow, do not use.
-BarSeq-fast.py -- 2nd implementation, faster than original but still too slow, do not use
