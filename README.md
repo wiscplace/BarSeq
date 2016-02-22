@@ -52,3 +52,8 @@ SplitBarSeqByUser-fast.py -f fastq file -s Seq_ID Up_Tag file
 
 	See Mike Place for any problems or suggestions.
 
+GENE_UpTag_Dictionary.py
+
+    Dictionary for MoBY Sequence UP_tags
+
+
