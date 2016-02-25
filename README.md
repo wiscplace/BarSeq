@@ -58,14 +58,14 @@ GENE_UpTag_Dictionary.py
 
 SplitBarSeq.py -f fastq file -s Seq_ID Up_Tag file
 
-  Purpose: Create a new fastq file for each sampleID.
+    Purpose: Create a new fastq file for each sampleID.
 
-  Input  : BarSeq fastq file, Seq_ID file
+    Input  : BarSeq fastq file, Seq_ID file
 
-  Seq_ID Up_Tag file:
-  Sample ID       Seq Index ID    Sequence Tag    User
-  1248 T0 A       A1      AATAGGCGCT    kevin 
-  1248 T0 B       B1      AGCGTATGTC    maria
+    Seq_ID Up_Tag file:
+    Sample ID       Seq Index ID    Sequence Tag    User
+    1248 T0 A       A1      AATAGGCGCT    kevin 
+    1248 T0 B       B1      AGCGTATGTC    maria
 
-  Usage  : SplitBarSeq.py -f data.fastq -s SeqID.txt
+    Usage  : SplitBarSeq.py -f data.fastq -s SeqID.txt
 
