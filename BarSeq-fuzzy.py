@@ -306,10 +306,10 @@ def main():
     # Start processing the data
     data = BarSeq(fastq, geneDecode, seqID, cwd)
     data.processFastq()   
-    """data.mergeCounts()
+    data.mergeCounts()
     data.writeTable(data.exact_Results,"Exact-Match.table")
     data.writeTable(data.fuzzy_Results, "1-MisMatch.table")
     data.writeMissingGenes()
-    """
+    
 if __name__ == "__main__":
     main()           
