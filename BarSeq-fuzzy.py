@@ -101,9 +101,9 @@ class BarSeq( object ):
         Match GENE UPTAG allowing 1 mismatch.
         """
         # walk down the sequence from the first start position
-        for outidx in range(25,31):
+        for outidx in range(24,31):
             start = outidx 
-            for idx in range(10,23):      # extract a sequence window
+            for idx in range(9,23):      # extract a sequence window
                 end = start + idx
                 geneSeq = read[start:end]
                 if geneSeq in gn.tags: 
@@ -304,12 +304,12 @@ def main():
     
     cwd = os.getcwd()
     # Start processing the data
-    data = BarSeq(fastq, geneDecode, seqID, cwd)  
+    data = BarSeq(fastq, geneDecode, seqID, cwd)
     data.processFastq()   
-    data.mergeCounts()
+    """data.mergeCounts()
     data.writeTable(data.exact_Results,"Exact-Match.table")
     data.writeTable(data.fuzzy_Results, "1-MisMatch.table")
     data.writeMissingGenes()
-
+    """
 if __name__ == "__main__":
     main()           
