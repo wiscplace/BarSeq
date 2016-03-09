@@ -101,9 +101,9 @@ class BarSeq( object ):
         Match GENE UPTAG allowing 1 mismatch.
         """
         # walk down the sequence from the first start position
-        for outidx in range(24,31):
+        for outidx in range(25,31):
             start = outidx 
-            for idx in range(9,23):      # extract a sequence window
+            for idx in range(10,23):      # extract a sequence window
                 end = start + idx
                 geneSeq = read[start:end]
                 if geneSeq in gn.tags: 
