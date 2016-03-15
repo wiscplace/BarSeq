@@ -1,6 +1,6 @@
 #!/home/GLBRCORG/mplace/anaconda3/bin/python
 """
-program: SplitBarSeqByUser-fast.py
+program: SplitBarSeqByUser.py
 
 purpose: Split Fastq (DNA Bar-Seq data) by user.
 
@@ -87,7 +87,7 @@ def getSeqIdTag( seqIDFile ):
                     
 def main():
     cmdparser = argparse.ArgumentParser(description="Split Fastq (DNA Bar-Seq data) by user.",
-                                        usage='%(prog)s -f fastq -s Seq_ID Up_Tag file', prog='SplitBarSeqByUser-fast.py'  )                                  
+                                        usage='%(prog)s -f fastq -s Seq_ID Up_Tag file', prog='SplitBarSeqByUser.py'  )                                  
     cmdparser.add_argument('-f', '--Fastq' , action='store'     , dest='FASTQ' , help='BarSeq fastq file'         , metavar='')  
     cmdparser.add_argument('-s', '--Seqid' , action='store'     , dest='SEQID' , help='Seq_ID file (experiment ID)', metavar='')
     cmdparser.add_argument('-i', '--info'  , action='store_true', dest='INFO'  , help='Print a more detailed description of program.')
@@ -100,7 +100,7 @@ def main():
         sys.exit(1)
     
     if cmdResults['INFO']:
-        print("\n  SplitBarSeqByUser-fast.py -f fastq file -s Seq_ID Up_Tag file")
+        print("\n  SplitBarSeqByUser.py -f fastq file -s Seq_ID Up_Tag file")
         print("\n  Purpose: Create a new fastq file for each users data.")
         print("\n  Input  : BarSeq fastq file, Seq_ID file")
         print()
@@ -109,7 +109,7 @@ def main():
         print("        1248 T0 A       A1      AATAGGCGCT    kevin ")
         print("        1248 T0 B       B1      AGCGTATGTC    maria")
         print()
-        print("\n  Usage  : SplitBarSeqByUser-fast.py -f data.fastq -s SeqID.txt")        
+        print("\n  Usage  : SplitBarSeqByUser.py -f data.fastq -s SeqID.txt")        
         print("  ")       
         print("\tTo see Python Docs for this program:")
         print("\n\tOpen python console and enter")
