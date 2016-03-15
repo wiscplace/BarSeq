@@ -1,6 +1,8 @@
 #!/home/mplace/anaconda3/bin/python
-
 """
+Used to create a dictionary of all possible tags
+with a 1 base pair mismatch at each position.
+
 Created on Sat Feb 20 19:47:27 2016
 
 @author: mplace

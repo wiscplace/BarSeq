@@ -1,4 +1,4 @@
-BarSeq-faster.py -f fastq file -d GENE UP_tag Decode file -s Seq_ID UP_tag Decode file
+BarSeq.py -f fastq file -d GENE UP_tag Decode file -s Seq_ID UP_tag Decode file
 
     Purpose: Produce a table of gene counts from DNA Bar-Seq data
 
@@ -28,7 +28,7 @@ BarSeq-faster.py -f fastq file -d GENE UP_tag Decode file -s Seq_ID UP_tag Decod
 	See Mike Place for any problems or suggestions.
 
 
-SplitBarSeqByUser-fast.py -f fastq file -s Seq_ID Up_Tag file
+SplitBarSeqByUser.py -f fastq file -s Seq_ID Up_Tag file
 
     Purpose: Create a new fastq file for each users data.
 
@@ -68,4 +68,11 @@ SplitBarSeq.py -f fastq file -s Seq_ID Up_Tag file
     1248 T0 B       B1      AGCGTATGTC    maria
 
     Usage  : SplitBarSeq.py -f data.fastq -s SeqID.txt
+
+tag_dictionary.py 
+
+    Purpose: Generate all possible single mismatches for a sequence
+
+    Input  : Gene Up Tag file
+
 

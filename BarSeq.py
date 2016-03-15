@@ -1,6 +1,6 @@
 #!/home/GLBRCORG/mplace/anaconda3/bin/python
 """
-program: BarSeq-fuzzy.py
+program: BarSeq.py
 
 purpose: Produce 2 tables (exact and 1 mismatch) of gene counts from DNA Bar-Seq data.
          The Bar-Seq fastq file is expected to be for a single user, 
@@ -242,7 +242,7 @@ class BarSeq( object ):
               
 def main():
     cmdparser = argparse.ArgumentParser(description="Produce a table of gene counts from DNA Bar-Seq data.",
-                                        usage='%(prog)s -f fastq -d UP_tag_Decode file -s Seq_ID file', prog='BarSeq-fuzzy.py'  )                                  
+                                        usage='%(prog)s -f fastq -d UP_tag_Decode file -s Seq_ID file', prog='BarSeq.py'  )                                  
     cmdparser.add_argument('-f', '--Fastq' , action='store'     , dest='FASTQ' , help='BarSeq fastq file'         , metavar='')
     cmdparser.add_argument('-d', '--Decode', action='store'     , dest='DECODE', help='GENE UP_tag_Decode file'        , metavar='')    
     cmdparser.add_argument('-s', '--Seqid' , action='store'     , dest='SEQID' , help='Seq_ID file (experiment ID)', metavar='')
@@ -256,7 +256,7 @@ def main():
         sys.exit(1)
     
     if cmdResults['INFO']:
-        print ("\n  BarSeq-fuzzy.py -f fastq file -d GENE UP_tag Decode file -s Seq_ID UP_tag Decode file")
+        print ("\n  BarSeq.py -f fastq file -d GENE UP_tag Decode file -s Seq_ID UP_tag Decode file")
         print ("\n  Purpose: Produce a table of gene counts from DNA Bar-Seq data")
         print ("\n  Input  : BarSeq fastq file, GENE UP_tag Decode file, Seq_ID UP_tag Decode file")
         print ("\n    GENE UP_tag Decode file:")
@@ -269,7 +269,7 @@ def main():
         print ("        1248 T0 A       A1      AATAGGCGCT    kevin ")
         print ("        1248 T0 B       B1      AGCGTATGTC    kevin")
         print ("\n")
-        print ("\n  Usage  : BarSeq-fuzzy.py -f data.fastq -d GENE_UP_tag_Decode.txt -s SeqID.txt")        
+        print ("\n  Usage  : BarSeq.py -f data.fastq -d GENE_UP_tag_Decode.txt -s SeqID.txt")        
         print ("  ")     
         print ("\tTo see Python Docs for this program:")
         print ("\n\tOpen python console and enter")
