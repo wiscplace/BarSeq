@@ -42,6 +42,7 @@ method  : Step 1) Contruct a BarSeq object, containing the fastq file, Gene UP_t
                   
 author  : mplace
 date    : Feb 5th 2016
+version : 1.0
 """
 from collections import defaultdict
 import argparse
