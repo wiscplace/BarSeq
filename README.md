@@ -85,4 +85,20 @@ tag_dictionary.py
 
     Input  : Gene Up Tag file
 
+GENE_UPTAG_Decode.txt
+    
+    Purpose:  Provides a list of S.cerevisiae gene names and the associated 
+    gene uptags for the MOBY collection.
+
+    format:
+    
+        Gene_ID UP_Tag_Seq_ID
+        YDR225W TGCTCTCCAT
+        YIL077C AGTATCACTA
+        YML058W TCAGGCTATT
+        YMR115W GCATCTGGCT
+        YNR059W GGATATATCG
+        YDL161W CGGATTCATCT
+
+
 
