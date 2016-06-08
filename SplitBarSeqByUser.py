@@ -8,7 +8,8 @@ input  : Bar-Seq Fastq file, Sequence_ID file
 
     Bar-Seq Fastq file - standard fastq file 
     
-    Sequence_ID file   - plain text w/ 4 columns, provided by sequencing facility,
+    Sequence_ID file   - plain text w/ 4 columns, (the first column has 3 items separated by
+    a space) provided by sequencing facility,
     only columns 1 & 4 matter. This identifies the experiment which is associated with 
     a particular user
                          
@@ -16,6 +17,9 @@ input  : Bar-Seq Fastq file, Sequence_ID file
             1248 T0 A       A1      AATAGGCGCT    kevin
             1248 T0 B       B1      AGCGTATGTC    kevin
             1248 T0 C       C1      AGTATGCACC    kevin
+
+    The use almost never provides the decode file in the required format.
+    It will have to be massaged w/ perl/sed/vim etc...
 
 output  : Separate Fastq files for each user, based on Sequence Tag
             
