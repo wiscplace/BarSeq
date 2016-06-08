@@ -33,13 +33,23 @@ SplitBarSeqByUser.py -f fastq file -s Seq_ID Up_Tag file
     Purpose: Create a new fastq file for each users data.
 
     Input  : BarSeq fastq file, Seq_ID file
-
+             File format is important, user almost never provides
+             the decode file in the same format, so you will
+             most likely have to manipulate it w/ vim or perl.
+             
+    example1:
         Seq_ID Up_Tag file:
         Sample ID       Seq Index ID    Sequence Tag    User
         1248 T0 A       A1      AATAGGCGCT    kevin 
         1248 T0 B       B1      AGCGTATGTC    maria
 
-
+    example2:
+        Sample Name XX  Index Tag   Maria
+        WA Lib 1    XX  AATAGGCGCT  Maria
+        WA Lib 2    XX  TACAGTTGCG  Maria
+        PAP Lib 1   XX  ATCCTAGCAG  Maria
+        PAP Lib 2   XX  GATTAGCCTC  Maria
+    
     Usage  : SplitBarSeqByUser.py -f data.fastq -s SeqID.txt
   
 	To see Python Docs for this program:
