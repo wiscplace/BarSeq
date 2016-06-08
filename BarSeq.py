@@ -35,10 +35,9 @@ method  : Step 1) Contruct a BarSeq object, containing the fastq file, Gene UP_t
           Step 2) Fastq file is precessed one read at a time.
                   First the sampleID (Experiment info) is identified using matchSeqID function : this matches the read start
                   with the Sequence_ID UP_tag.
-                  If a match is found, then matchGene is called, this trims the first 28 bases off the read and sets the length
+                  If a match is not found, then matchGene is called, this trims the first 28 bases off the read and sets the length
                   to the length of a Gene UP_tag and searches the geneUpTag dict using the sequence as a key.
                   If a match is found, the gene count is incremented.
-                  If no match then a fuzzy search is used to try and match a gene with 1 base difference.
                   
 author  : mplace
 date    : Feb 5th 2016
